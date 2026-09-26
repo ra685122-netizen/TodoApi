@@ -1,0 +1,37 @@
+@TodoApi_HostAddress = http://localhost:5047
+
+GET {{TodoApi_HostAddress}}/weatherforecast/all
+Accept: application/json
+
+###
+
+GET {{TodoApi_HostAddress}}/weatherforecast/today
+Accept: application/json
+
+###
+
+GET {{TodoApi_HostAddress}}/weatherforecast/5
+Accept: application/json
+###
+
+POST {{TodoApi_HostAddress}}/weatherforecast
+Content-Type: application/json
+
+{
+    "date": "2026-09-26",
+    "temperatureC": 25,
+    "summary": "Warm"
+}
+###
+
+PUT {{TodoApi_HostAddress}}/weatherforecast/5
+Content-Type: application/json
+
+{
+    "date": "2026-09-26",
+    "temperatureC": 30,
+    "summary": "Hot"
+}
+###
+
+DELETE {{TodoApi_HostAddress}}/weatherforecast/5
