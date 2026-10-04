@@ -12,15 +12,15 @@ namespace TodoApi.Services;
 public class AuthService : IAuthService
 {
     private readonly IConfiguration _configuration;
-    private static readonly List<(string Username, string Password)> Users =
-    [
-        ("admin", "1234"),
-        ("rima", "1234")
-    ];
-//مكان مؤقت نخزن فيه الـ Refresh Tokens
+    private static readonly List<(string Username, string Password, string Role)> Users =
+ [
+     ("admin", "1234", "Admin"),
+    ("rima", "1234", "User")
+ ];
+    //مكان مؤقت نخزن فيه الـ Refresh Tokens
     private static readonly ConcurrentDictionary<
         string,
-        (string Username, DateTime ExpiresAt)
+      (string Username, string Role, DateTime ExpiresAt)
     > RefreshTokens = new();
 
     public AuthService(IConfiguration configuration)
@@ -39,7 +39,7 @@ public class AuthService : IAuthService
             return null;
         }
 
-        return CreateTokenPair(user.Username);
+        return CreateTokenPair(user.Username, user.Role);
     }
 
     public TokenResponse? RefreshToken(string refreshToken)
@@ -62,14 +62,15 @@ public class AuthService : IAuthService
 
         RefreshTokens.TryRemove(refreshToken, out _);
 
-        return CreateTokenPair(storedToken.Username);//نشئ التوكنات الجديدة
+        return CreateTokenPair(storedToken.Username, storedToken.Role);
     }
 
-    private TokenResponse CreateTokenPair(string username)
+    private TokenResponse CreateTokenPair(string username, string role)
     {
         var claims = new[]          //داخل الـ JWT معلومة عن المستخدم
         {
-            new Claim(ClaimTypes.Name, username)
+               new Claim(ClaimTypes.Name, username),
+               new Claim(ClaimTypes.Role, role)
         };
 
         var key = new SymmetricSecurityKey(
@@ -100,7 +101,7 @@ public class AuthService : IAuthService
             );
 
         RefreshTokens[refreshToken] =
-            (username, DateTime.UtcNow.AddDays(30));
+         (username, role, DateTime.UtcNow.AddDays(30));
 
         return new TokenResponse
         {
