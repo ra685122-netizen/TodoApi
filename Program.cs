@@ -1,9 +1,13 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;//عشان نستخدم نظام JWT Bearer Authentication.
-using Microsoft.IdentityModel.Tokens;//فيه الأدوات اللي نحتاجها للتحقق من توقيع الـ JWT.
-using System.Text;//لأن الـ Secret Key عندنا عبارة عن string، ونحتاج نحوله إلى bytes عند إنشاء مفتاح التوقيع.
-
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using TodoApi.Services;
+using Scalar.AspNetCore;
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Services.AddControllers();//إضافة Controllers
+builder.Services.AddScoped<IAuthService, AuthService>();
+//ينشئ نسخة من AuthService لكل HTTP request ويستخدمها خلال هذا الطلب.
 // Add services to the container.
 
 builder.Services.AddControllers();
@@ -34,15 +38,10 @@ builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-
-    app.UseSwaggerUi(options =>
-    {
-        options.DocumentPath = "/openapi/v1.json";
-    });
+    app.MapOpenApi(); //ينشئ OpenAPI document.
+    app.MapScalarApiReference(); //يضيف واجهة Scalar.
 }
 
 app.UseHttpsRedirection();

@@ -9,7 +9,13 @@ Content-Type: application/json
     "username": "admin",
     "password": "1234"
 }
+### 🔄 REFRESH TOKEN
+POST {{TodoApi_HostAddress}}/authentication/token/refresh
+Content-Type: application/json
 
+{
+    "refreshToken":"tdo6zERTBZeEmhIeOilpS1cxz3SuprYqSOEljdemQ3JfoDwj7gYIqMzCCpjfeknvOt5+j7kxCU6tKSgU/Tr6WA=="
+}
 
 ### 🔒 GET - Without Token
 GET {{TodoApi_HostAddress}}/weatherforecast/
