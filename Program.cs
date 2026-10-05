@@ -3,6 +3,7 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TodoApi.Services;
 using Scalar.AspNetCore;
+using TodoApi.Middleware;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();//إضافة Controllers
@@ -43,7 +44,7 @@ if (app.Environment.IsDevelopment())
     app.MapOpenApi(); //ينشئ OpenAPI document.
     app.MapScalarApiReference(); //يضيف واجهة Scalar.
 }
-
+app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseHttpsRedirection();
 
 app.UseAuthentication();

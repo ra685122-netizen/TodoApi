@@ -18,7 +18,6 @@ public class WeatherForecastController : ControllerBase
     [HttpGet("{id}")]
     public ActionResult<WeatherForecast> GetById(int id)
     {
-        
         var weather = weatherForecasts.FirstOrDefault(w => w.Id == id);
 
         if (weather == null)
