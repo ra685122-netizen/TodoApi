@@ -1,11 +1,9 @@
-
 using TodoApi.Models;
 
 namespace TodoApi.Services;
 
 public interface IAuthService
 {
-    TokenResponse? Login(LoginRequest request);
-
+    Task<TokenResponse?> LoginAsync(LoginRequest request);
     TokenResponse? RefreshToken(string refreshToken);
 }

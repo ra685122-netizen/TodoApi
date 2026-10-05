@@ -4,43 +4,52 @@ using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Security.Cryptography;//إنشاء Refresh Token عشوائي وقوي.
 using System.Text;//لتحويل الـ secret key إلى bytes
+using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 using TodoApi.Models;
+
 
 namespace TodoApi.Services;
 
 public class AuthService : IAuthService
 {
     private readonly IConfiguration _configuration;
-    private static readonly List<(string Username, string Password, string Role)> Users =
- [
-     ("admin", "1234", "Admin"),
-    ("rima", "1234", "User")
- ];
+    private readonly UserManager<IdentityUser> _userManager; //سمح لـ AuthService يتعامل مع مستخدمي Identity.
+
     //مكان مؤقت نخزن فيه الـ Refresh Tokens
     private static readonly ConcurrentDictionary<
         string,
       (string Username, string Role, DateTime ExpiresAt)
     > RefreshTokens = new();
 
-    public AuthService(IConfiguration configuration)
+    public AuthService(
+        UserManager<IdentityUser> userManager,
+        IConfiguration configuration)
     {
+        _userManager = userManager;
         _configuration = configuration;
     }
-
-    public TokenResponse? Login(LoginRequest request)
+    public async Task<TokenResponse?> LoginAsync(LoginRequest request)
     {
-        var user = Users.FirstOrDefault(u =>
-            u.Username == request.Username &&
-            u.Password == request.Password);
+        var user = await _userManager.FindByNameAsync(request.Username);
 
-        if (user == default)
+        if (user is null)
         {
             return null;
         }
-
-        return CreateTokenPair(user.Username, user.Role);
+        var passwordValid = await _userManager.CheckPasswordAsync(
+            user,
+            request.Password
+        );
+        if (!passwordValid)
+        {
+            return null;
+        }
+        var roles = await _userManager.GetRolesAsync(user);
+        var role = roles.FirstOrDefault() ?? "User";
+        return CreateTokenPair(user.UserName!, role);
     }
+
 
     public TokenResponse? RefreshToken(string refreshToken)
     {
