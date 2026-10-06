@@ -4,8 +4,7 @@ using Microsoft.EntityFrameworkCore;//ues to DbContextOptions
 
 namespace TodoApi.Data;
 
-public class AppDbContext : IdentityDbContext 
-{
+public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, string>{
     public AppDbContext(DbContextOptions<AppDbContext> options) //ASP.NET Core بيعطي AppDbContext الإعدادات الخاصة بقاعدة البيانات.
         : base(options) //مرر إعدادات قاعدة البيانات إلى الـ IdentityDbContext الأساسي.
     {

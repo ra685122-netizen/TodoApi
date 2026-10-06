@@ -5,6 +5,7 @@ using System.Security.Claims;
 using System.Security.Cryptography;//إنشاء Refresh Token عشوائي وقوي.
 using System.Text;//لتحويل الـ secret key إلى bytes
 using Microsoft.AspNetCore.Identity;
+using TodoApi.Data;
 using Microsoft.IdentityModel.Tokens;
 using TodoApi.Models;
 
@@ -14,7 +15,8 @@ namespace TodoApi.Services;
 public class AuthService : IAuthService
 {
     private readonly IConfiguration _configuration;
-    private readonly UserManager<IdentityUser> _userManager; //سمح لـ AuthService يتعامل مع مستخدمي Identity.
+    private readonly UserManager<ApplicationUser> _userManager;
+    private readonly SignInManager<ApplicationUser> _signInManager;
 
     //مكان مؤقت نخزن فيه الـ Refresh Tokens
     private static readonly ConcurrentDictionary<
@@ -23,10 +25,12 @@ public class AuthService : IAuthService
     > RefreshTokens = new();
 
     public AuthService(
-        UserManager<IdentityUser> userManager,
-        IConfiguration configuration)
+    UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager,
+    IConfiguration configuration)
     {
         _userManager = userManager;
+        _signInManager = signInManager;
         _configuration = configuration;
     }
     public async Task<TokenResponse?> LoginAsync(LoginRequest request)
@@ -37,11 +41,13 @@ public class AuthService : IAuthService
         {
             return null;
         }
-        var passwordValid = await _userManager.CheckPasswordAsync(
-            user,
-            request.Password
-        );
-        if (!passwordValid)
+        var result = await _signInManager.CheckPasswordSignInAsync(  //إذا كلمة المرور غلط، سجّل هذه كمحاولة فاشلة وطبّق نظام Lockout.
+      user,
+      request.Password,
+      lockoutOnFailure: true
+  );
+
+        if (!result.Succeeded)
         {
             return null;
         }

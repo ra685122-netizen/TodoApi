@@ -16,16 +16,20 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     )
 );
 builder.Services //هذا للتدريب فقط عشان نقدر نستخدم 1234.
-    .AddIdentityCore<IdentityUser>(options =>
-    {
-        options.Password.RequiredLength = 4;
-        options.Password.RequireDigit = false;
-        options.Password.RequireLowercase = false;
-        options.Password.RequireUppercase = false;
-        options.Password.RequireNonAlphanumeric = false;
-    })
-    .AddRoles<IdentityRole>()
-    .AddEntityFrameworkStores<AppDbContext>();
+        .AddIdentityCore<ApplicationUser>(options =>
+        {
+            options.Password.RequiredLength = 4;
+            options.Password.RequireDigit = false;
+            options.Password.RequireLowercase = false;
+            options.Password.RequireUppercase = false;
+            options.Password.RequireNonAlphanumeric = false;
+            options.Lockout.MaxFailedAccessAttempts = 3;
+            options.Lockout.DefaultLockoutTimeSpan = TimeSpan.FromMinutes(1);
+            options.Lockout.AllowedForNewUsers = true;
+        })
+    .AddRoles<ApplicationRole>()
+    .AddEntityFrameworkStores<AppDbContext>()          //خزّن بيانات Identity في قاعدة البيانات عن طريق AppDbContext.
+.AddSignInManager(); //SignInManager مسؤول عن عملية تسجيل الدخول في Identity.
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services
     .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
