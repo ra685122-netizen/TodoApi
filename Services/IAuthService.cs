@@ -5,5 +5,5 @@ namespace TodoApi.Services;
 public interface IAuthService
 {
     Task<TokenResponse?> LoginAsync(LoginRequest request);
-    TokenResponse? RefreshToken(string refreshToken);
+    Task<TokenResponse?> RefreshTokenAsync(string refreshToken);
 }

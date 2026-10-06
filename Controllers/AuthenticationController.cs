@@ -32,9 +32,11 @@ public class AuthenticationController : ControllerBase
 
     [AllowAnonymous]
     [HttpPost("token/refresh")]
-    public IActionResult RefreshToken(RefreshTokenRequest request)
+    public async Task<IActionResult> RefreshToken(RefreshTokenRequest request)
     {
-        var result = _authService.RefreshToken(request.RefreshToken);
+        var result = await _authService.RefreshTokenAsync(
+            request.RefreshToken
+        );
 
         if (result is null)
         {

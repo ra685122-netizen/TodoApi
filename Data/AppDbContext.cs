@@ -1,12 +1,15 @@
-
- using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore;//ues to DbContextOptions
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
+using TodoApi.Models;
 
 namespace TodoApi.Data;
 
-public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, string>{
-    public AppDbContext(DbContextOptions<AppDbContext> options) //ASP.NET Core بيعطي AppDbContext الإعدادات الخاصة بقاعدة البيانات.
-        : base(options) //مرر إعدادات قاعدة البيانات إلى الـ IdentityDbContext الأساسي.
+public class AppDbContext : IdentityDbContext<ApplicationUser, ApplicationRole, string>
+{
+    public AppDbContext(DbContextOptions<AppDbContext> options)
+        : base(options)
     {
     }
+
+    public DbSet<RefreshToken> RefreshTokens { get; set; }
 }
