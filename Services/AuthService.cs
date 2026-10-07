@@ -12,6 +12,7 @@ using TodoApi.Data;
 using TodoApi.Models;
 
 namespace TodoApi.Services;
+
 public class AuthService : IAuthService
 {
     private readonly IConfiguration _configuration;
@@ -25,10 +26,10 @@ public class AuthService : IAuthService
       AppDbContext dbContext,
       IConfiguration configuration)
     {
-      _userManager = userManager;
-      _signInManager = signInManager;
-      _dbContext = dbContext;
-      _configuration = configuration;
+        _userManager = userManager;
+        _signInManager = signInManager;
+        _dbContext = dbContext;
+        _configuration = configuration;
     }
     public async Task<TokenResponse?> LoginAsync(LoginRequest request)
     {
@@ -82,24 +83,41 @@ public class AuthService : IAuthService
             return null;
         }
 
-        var user = await _userManager.FindByIdAsync(storedToken.UserId); //البحث عن المستخدم
+        var user = await _userManager.FindByIdAsync(storedToken.UserId);
 
         if (user is null)
         {
             return null;
         }
 
-        _dbContext.RefreshTokens.Remove(storedToken); //حذف الـ Refresh Token بعد استخدامه
-        await _dbContext.SaveChangesAsync();
+        await using var transaction =
+            await _dbContext.Database.BeginTransactionAsync();
 
-        var roles = await _userManager.GetRolesAsync(user);
-        var role = roles.FirstOrDefault() ?? "User";
+        try
+        {
+            _dbContext.RefreshTokens.Remove(storedToken);
+            await _dbContext.SaveChangesAsync();
 
-        return await CreateTokenPairAsync(
-            user.UserName!,
-             user.Id,
-              role);
+            var roles = await _userManager.GetRolesAsync(user);
+            var role = roles.FirstOrDefault() ?? "User";
+
+            var result = await CreateTokenPairAsync(
+                user.UserName!,
+                user.Id,
+                role);
+
+
+            await transaction.CommitAsync();
+
+            return result;
+        }
+        catch
+        {
+            await transaction.RollbackAsync();
+            throw;
+        }
     }
+    //
     private async Task<TokenResponse> CreateTokenPairAsync(
         string username,
         string userId,
@@ -155,5 +173,7 @@ public class AuthService : IAuthService
             Token = accessToken,
             RefreshToken = refreshTokenValue
         };
+
     }
+
 }
