@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using TodoApi.Data;
 using Microsoft.AspNetCore.Identity;
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddHttpContextAccessor(); //تحتاج خدمة إلى معرفة المستخدم الذي أرسل الطلب حتى تتعامل مع مهامه.   //الـ JWT مسؤول عن التحقق من هوية المستخدم، بينما HttpContextAccessor يتيح الوصول إلى هذه الهوية من خلال HttpContext.User
 
 builder.Services.AddControllers();
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -15,7 +16,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")
     )
 );
-builder.Services //هذا للتدريب فقط عشان نقدر نستخدم 1234.
+builder.Services 
         .AddIdentityCore<ApplicationUser>(options =>
         {
             options.Password.RequiredLength = 4;
@@ -54,8 +55,7 @@ builder.Services
     });
 builder.Services.AddOpenApi();
 var app = builder.Build();
-//أنشئ لي نطاق مؤقت أقدر داخله أستخدم خدمات Identity
-using (var scope = app.Services.CreateScope())           //UserManager وRoleManager خدمات Scoped
+using (var scope = app.Services.CreateScope())           
 {
     await IdentitySeeder.SeedAsync(scope.ServiceProvider);
 }

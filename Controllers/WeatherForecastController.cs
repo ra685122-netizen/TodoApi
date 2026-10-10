@@ -7,11 +7,23 @@ namespace TodoApi.Controllers;
 [Authorize]
 public class WeatherForecastController : ControllerBase
 {
+    private readonly IHttpContextAccessor _httpContextAccessor;
+
+    public WeatherForecastController(
+        IHttpContextAccessor httpContextAccessor)
+    {
+        _httpContextAccessor = httpContextAccessor;
+    }
     private static WeatherForecast[] weatherForecasts = [];
 
     [HttpGet]
     public ActionResult<WeatherForecast[]> Get()
     {
+        var username = _httpContextAccessor.HttpContext?
+            .User.Identity?.Name;
+
+        Console.WriteLine($"Current user: {username}");
+
         return Ok(weatherForecasts);
     }
 
