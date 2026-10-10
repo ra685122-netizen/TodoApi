@@ -11,11 +11,22 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddHttpContextAccessor(); //تحتاج خدمة إلى معرفة المستخدم الذي أرسل الطلب حتى تتعامل مع مهامه.   //الـ JWT مسؤول عن التحقق من هوية المستخدم، بينما HttpContextAccessor يتيح الوصول إلى هذه الهوية من خلال HttpContext.User
 
 builder.Services.AddControllers();
+builder.Services.AddCors(options => //يسجّل إعدادات CORS في التطبيق
+{
+    options.AddPolicy("FrontendPolicy", policy =>
+    {
+        policy
+            .WithOrigins("http://localhost:4200") //حدد عنوان الواجهة المسموح لها
+            .WithMethods("GET", "POST", "PUT", "DELETE")
+            .AllowAnyHeader();
+    });
+});
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("DefaultConnection")
     )
 );
+
 builder.Services 
         .AddIdentityCore<ApplicationUser>(options =>
         {
@@ -66,6 +77,7 @@ if (app.Environment.IsDevelopment())
 }
 app.UseMiddleware<ExceptionHandlingMiddleware>();
 app.UseHttpsRedirection();
+app.UseCors("FrontendPolicy");
 
 app.UseAuthentication();
 app.UseAuthorization();
