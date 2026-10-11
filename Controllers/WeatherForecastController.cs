@@ -20,7 +20,7 @@ public class WeatherForecastController : ControllerBase
     public ActionResult<WeatherForecast[]> Get()
     {
         var username = _httpContextAccessor.HttpContext?
-            .User.Identity?.Name;
+            .User.Identity?.Name; //هوية المستخدم وبياناتها
 
         Console.WriteLine($"Current user: {username}");
 

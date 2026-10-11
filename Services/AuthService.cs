@@ -1,8 +1,8 @@
 
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
-using System.Security.Cryptography;//إنشاء Refresh Token عشوائي وقوي.
-using System.Text;//لتحويل الـ secret key إلى bytes
+using System.Security.Cryptography;
+using System.Text;
 
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +18,7 @@ public class AuthService : IAuthService
     private readonly IConfiguration _configuration;
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
-    private readonly AppDbContext _dbContext; //الباب الذي نتعامل من خلاله مع قاعدة البيانات
+    private readonly AppDbContext _dbContext; 
 
     public AuthService(
       UserManager<ApplicationUser> userManager,
@@ -66,8 +66,8 @@ public class AuthService : IAuthService
         {
             return null;
         }
-
-        var storedToken = await _dbContext.RefreshTokens
+                                                          
+        var storedToken = await _dbContext.RefreshTokens            //بحث عن الـ Refresh Token في قاعدة البيانات
             .FirstOrDefaultAsync(x => x.Token == refreshToken);
 
         if (storedToken is null)
@@ -78,12 +78,12 @@ public class AuthService : IAuthService
         if (storedToken.ExpiresAt <= DateTime.UtcNow)
         {
             _dbContext.RefreshTokens.Remove(storedToken);
-            await _dbContext.SaveChangesAsync();
+            await _dbContext.SaveChangesAsync(); 
 
             return null;
         }
 
-        var user = await _userManager.FindByIdAsync(storedToken.UserId);
+        var user = await _userManager.FindByIdAsync(storedToken.UserId);//نبحث عن صاحب الـ Refresh Token
 
         if (user is null)
         {
@@ -95,19 +95,20 @@ public class AuthService : IAuthService
 
         try
         {
+            //لأننا نطبق Refresh Token Rotation.
             _dbContext.RefreshTokens.Remove(storedToken);
             await _dbContext.SaveChangesAsync();
 
             var roles = await _userManager.GetRolesAsync(user);
             var role = roles.FirstOrDefault() ?? "User";
 
-            var result = await CreateTokenPairAsync(
+            var result = await CreateTokenPairAsync(                 
                 user.UserName!,
                 user.Id,
                 role);
 
 
-            await transaction.CommitAsync();
+            await transaction.CommitAsync(); 
 
             return result;
         }
@@ -117,7 +118,7 @@ public class AuthService : IAuthService
             throw;
         }
     }
-    //
+    
     private async Task<TokenResponse> CreateTokenPairAsync(
         string username,
         string userId,
@@ -150,7 +151,6 @@ public class AuthService : IAuthService
 
         var accessToken =
             new JwtSecurityTokenHandler().WriteToken(token);
-        //نولد قيمة عشوائية قوية
         var refreshTokenValue =
             Convert.ToBase64String(
                 RandomNumberGenerator.GetBytes(64)
@@ -158,7 +158,6 @@ public class AuthService : IAuthService
 
         var refreshToken = new RefreshToken
         {
-            //السجل الذي سيدخل جدول RefreshTokens
             Token = refreshTokenValue,
             UserId = userId,
             ExpiresAt = DateTime.UtcNow.AddDays(30)

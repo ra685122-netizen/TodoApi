@@ -7,7 +7,7 @@ public class RefreshToken
 
     public string Token { get; set; } = null!; 
 
-    public string UserId { get; set; } = null!; //هذا الـ Refresh Token تابع لأي User؟
+    public string UserId { get; set; } = null!;
 
     public DateTime ExpiresAt { get; set; }
 }

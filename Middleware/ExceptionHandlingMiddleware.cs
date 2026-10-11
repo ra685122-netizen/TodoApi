@@ -20,8 +20,8 @@ public class ExceptionHandlingMiddleware
         }
         catch (Exception)
         {
-            context.Response.StatusCode = 500; //500 Internal Server Error //حصل خطأ غير متوقع داخل السيرفر
-            context.Response.ContentType = "application/json"; //مانبي نص عشوائي
+            context.Response.StatusCode = 500; 
+            context.Response.ContentType = "application/json"; 
 
             var response = new
             {

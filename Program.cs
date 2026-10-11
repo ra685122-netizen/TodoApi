@@ -8,11 +8,16 @@ using Microsoft.EntityFrameworkCore;
 using TodoApi.Data;
 using Microsoft.AspNetCore.Identity;
 var builder = WebApplication.CreateBuilder(args);
-builder.Services.AddHttpContextAccessor(); //تحتاج خدمة إلى معرفة المستخدم الذي أرسل الطلب حتى تتعامل مع مهامه.   //الـ JWT مسؤول عن التحقق من هوية المستخدم، بينما HttpContextAccessor يتيح الوصول إلى هذه الهوية من خلال HttpContext.User
+builder.Services.AddHttpContextAccessor(); //تحتاج خدمة إلى معرفة المستخدم الذي أرسل الطلب حتى تتعامل مع مهامه ـ JWT مسؤول عن التحقق من هوية المستخدم، بينما HttpContextAccessor يتيح الوصول إلى هذه الهوية من خلال HttpContext.User
 
 builder.Services.AddControllers();
-builder.Services.AddCors(options => //يسجّل إعدادات CORS في التطبيق
+builder.Services.AddHttpClient<IExternalPostsService, ExternalPostsService>(client =>
 {
+    client.BaseAddress = new Uri("https://jsonplaceholder.typicode.com/");
+});
+
+builder.Services.AddCors(options => //يسجّل إعدادات CORS في التطبيق
+{//نحدد فيها شروط الوصول
     options.AddPolicy("FrontendPolicy", policy =>
     {
         policy
@@ -27,7 +32,7 @@ builder.Services.AddDbContext<AppDbContext>(options =>
     )
 );
 
-builder.Services 
+builder.Services
         .AddIdentityCore<ApplicationUser>(options =>
         {
             options.Password.RequiredLength = 4;
@@ -66,7 +71,7 @@ builder.Services
     });
 builder.Services.AddOpenApi();
 var app = builder.Build();
-using (var scope = app.Services.CreateScope())           
+using (var scope = app.Services.CreateScope())
 {
     await IdentitySeeder.SeedAsync(scope.ServiceProvider);
 }
