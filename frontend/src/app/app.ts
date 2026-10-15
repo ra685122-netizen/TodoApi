@@ -1,12 +1,15 @@
-import { Component } from '@angular/core';
+import { Component, signal } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { Footer } from './components/footer/footer';
+import { Products } from './components/products/products';
+import { Header } from './components/header/header';
 
 @Component({
+  imports: [Header,Footer,Products],
   selector: 'app-root',
-  imports: [RouterOutlet],
+  styleUrl: './app.css',
   templateUrl: './app.html',
-  styleUrl: './app.scss'
 })
 export class App {
-  protected title = 'frontend';
+  protected readonly title = signal('frontend-new');
 }
