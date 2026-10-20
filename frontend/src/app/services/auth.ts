@@ -11,16 +11,16 @@ import {
 
 import { LoginRequest } from '../models/login-request';
 import { TokenResponse } from '../models/token-response';
+import { environment } from '../../environments/environment';
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private readonly apiUrl = 'http://localhost:5047/Authentication';
-
+  private readonly apiUrl = `${environment.apiUrl}/Authentication`;
   private refreshRequest$: Observable<TokenResponse> | null = null;
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient) { }
 
   login(request: LoginRequest): Observable<TokenResponse> {
     return this.http

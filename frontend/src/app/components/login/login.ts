@@ -20,13 +20,18 @@ export class Login {
   constructor(
     private authService: AuthService,
     private router: Router
-  ) {}
+  ) { }
 
   onSubmit(): void {
     this.errorMessage = '';
 
     if (!this.username.trim() || !this.password) {
       this.errorMessage = 'Please enter your username and password.';
+      return;
+    }
+
+    if (this.password.length < 4) {
+      this.errorMessage = 'Password must be at least 4 characters long.';
       return;
     }
 
