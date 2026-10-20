@@ -1,5 +1,7 @@
 import { Component } from '@angular/core';
-import { FormsModule } from '@angular/forms'; //يسمح باستخدام ngModel لربط الحقول بالمتغيرات
+import { FormsModule } from '@angular/forms';
+import { Router } from '@angular/router';
+import { finalize } from 'rxjs';
 import { AuthService } from '../../services/auth';
 
 @Component({
@@ -15,12 +17,15 @@ export class Login {
   errorMessage = '';
   isLoading = false;
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
   onSubmit(): void {
     this.errorMessage = '';
 
-    if (!this.username.trim() || !this.password) { //يزيل المسافات الزائدة من بداية اسم المستخدم ونهايته
+    if (!this.username.trim() || !this.password) {
       this.errorMessage = 'Please enter your username and password.';
       return;
     }
@@ -30,15 +35,23 @@ export class Login {
     this.authService.login({
       username: this.username.trim(),
       password: this.password
-    }).subscribe({                     //يتعامل مع نتيجة طلب HTTP
-      next: () => {
-        window.location.href = '/dashboard';
-      },
-      error: () => {
-        this.errorMessage = 'Login failed. Check your username and password.';
+    }).pipe(
+      finalize(() => {
         this.isLoading = false;
+      })
+    ).subscribe({
+      next: () => {
+        this.router.navigate(['/dashboard']);
+      },
+      error: (error) => {
+        if (error.status === 401) {
+          this.errorMessage = 'Invalid username or password.';
+        } else {
+          this.errorMessage = 'Login failed. Please try again.';
+        }
+
+        console.error('Login request failed:', error.status);
       }
     });
   }
 }
-

@@ -12,15 +12,15 @@ export const routes: Routes = [
   {
     path: 'dashboard',
     component: Dashboard,
-    canActivate: [authGuard]           //يشترط اجتياز Guard قبل فتح Dashboard
+    canActivate: [authGuard]                                                                                                                                   //يشترط اجتياز Guard قبل فتح Dashboard
   },
   {
     path: '',
-    redirectTo: 'login',           //حوّل المسار الرئيسي إلى تسجيل الدخول.
-    pathMatch: 'full'              //يشترط تطابق المسار كاملًا مع المسار الفارغ
+    redirectTo: 'login',                                                                                                                                        //حوّل المسار الرئيسي إلى تسجيل الدخول.
+    pathMatch: 'full'                                                                                                                                           //يشترط تطابق المسار كاملًا مع المسار الفارغ
   },
   {
-    path: '**',                   // يلتقط المسارات غير المعروفة ويوجهها إلى Login
+    path: '**',                                                                                                                                              // يلتقط المسارات غير المعروفة ويوجهها إلى Login
     redirectTo: 'login'
   }
 ];

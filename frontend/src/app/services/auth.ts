@@ -1,6 +1,14 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, tap, catchError, throwError } from 'rxjs';
+import {
+  Observable,                                                                                                                                                                               //يمثل عملية غير متزامنة قد ترجع نتيجة لاحقًا، مثل طلب تسجيل الدخول.
+  tap,                                                                                                                                                                                      //ينفذ إجراءً جانبيًا عند وصول النتيجة، مثل حفظ التوكن.
+  catchError,                                                                                                                                                                               //يعالج الأخطاء التي تحدث أثناء الطلب.
+  throwError,                                                                                                                                                                               //يعيد الخطأ إلى الجزء الذي استدعى العملية.
+  finalize,                                                                                                                                                                                 //ينفذ إجراءً عند انتهاء العملية، سواء نجحت أو فشلت أو أُلغيت.
+  shareReplay                                                                                                                                                                               //يسمح لعدة مشتركين بمشاركة نتيجة العملية نفسها بدل تنفيذ طلبات مكررة.
+} from 'rxjs';
+
 import { LoginRequest } from '../models/login-request';
 import { TokenResponse } from '../models/token-response';
 
@@ -9,6 +17,8 @@ import { TokenResponse } from '../models/token-response';
 })
 export class AuthService {
   private readonly apiUrl = 'http://localhost:5047/Authentication';
+
+  private refreshRequest$: Observable<TokenResponse> | null = null;
 
   constructor(private http: HttpClient) {}
 
@@ -21,6 +31,10 @@ export class AuthService {
   }
 
   refreshToken(): Observable<TokenResponse> {
+    if (this.refreshRequest$) {
+      return this.refreshRequest$;
+    }
+
     const refreshToken = localStorage.getItem('refreshToken');
 
     if (!refreshToken) {
@@ -28,7 +42,7 @@ export class AuthService {
       return throwError(() => new Error('No refresh token found.'));
     }
 
-    return this.http
+    this.refreshRequest$ = this.http
       .post<TokenResponse>(
         `${this.apiUrl}/token/refresh`,
         { refreshToken }
@@ -38,8 +52,14 @@ export class AuthService {
         catchError(error => {
           this.logout();
           return throwError(() => error);
-        })
+        }),
+        finalize(() => {
+          this.refreshRequest$ = null;
+        }),
+        shareReplay({ bufferSize: 1, refCount: false })
       );
+
+    return this.refreshRequest$;
   }
 
   private saveTokens(response: TokenResponse): void {
@@ -57,7 +77,7 @@ export class AuthService {
     if (!token) {
       return true;
     }
-
+    //تقرأ JWT
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const expirationTime = payload.exp * 1000;
@@ -77,3 +97,4 @@ export class AuthService {
     localStorage.removeItem('refreshToken');
   }
 }
+

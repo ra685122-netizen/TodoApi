@@ -22,8 +22,11 @@ builder.Services.AddCors(options => //يسجّل إعدادات CORS في الت
     {
         policy
             .WithOrigins("http://localhost:4200") //حدد عنوان الواجهة المسموح لها
-            .WithMethods("GET", "POST", "PUT", "DELETE")
+            .AllowAnyMethod()
             .AllowAnyHeader();
+
+
+
     });
 });
 builder.Services.AddDbContext<AppDbContext>(options =>

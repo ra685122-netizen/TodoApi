@@ -1,11 +1,10 @@
-
 <div class="login-container">
-  <form class="login-card" (ngSubmit)="onSubmit()">        <!--يستدعي الدالة عند إرسال النموذج-->
+  <form class="login-card" (ngSubmit)="onSubmit()">
     <h1>Welcome Back</h1>
     <p>Sign in to continue</p>
 
     <label for="username">Username</label>
-   <input
+    <input
       id="username"
       name="username"
       type="text"
@@ -13,7 +12,7 @@
       placeholder="Enter your username"
       autocomplete="username"
       required
-    />          <!-- (ngmodel)يربط حقل اسم المستخدم بالمتغير username-->
+    />
 
     <label for="password">Password</label>
     <input
@@ -27,7 +26,9 @@
     />
 
     @if (errorMessage) {
-      <p class="error-message">{{ errorMessage }}</p>
+      <p class="error-message" role="alert">
+        {{ errorMessage }}
+      </p>
     }
 
     <button type="submit" [disabled]="isLoading">
@@ -35,3 +36,4 @@
     </button>
   </form>
 </div>
+
